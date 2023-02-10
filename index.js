@@ -10,11 +10,11 @@ app.use(cors())
 app.use(express.static('build'))
 app.use(express.json())
 
-const errorHandler = (error, request, response, next) => {
+const errorHandler = (error, request, res, next) => {
     console.error(error.message)
 
     if (error.name === 'CastError') {
-        return response.status(400).send({ error: 'malformatted id' })
+        return res.status(400).send({ error: 'malformatted id' })
     }
 
     next(error)
@@ -68,7 +68,7 @@ app.get('/info', (req, res) => {
 //3.1 -> 3.13 (w mongoose)
 app.get('/api/persons', (req, res) => {
     Person.find({}).then(persons => {
-        response.json(persons)
+        res.json(persons)
     })
 })
 
@@ -109,7 +109,7 @@ app.post('/api/persons', (req, res) => {
         number: body.number
     })
     person.save().then(savedPerson => {
-        response.json(savedPerson)
+        res.json(savedPerson)
     })
 })
 
