@@ -1,32 +1,45 @@
+require('dotenv').config()
+const Person = require('./models/person')
+
 const express = require('express')
 const app = express()
 const morgan = require('morgan')
 const cors = require('cors')
+const { response } = require('express')
 app.use(cors())
 app.use(express.static('build'))
 app.use(express.json())
 
+const errorHandler = (error, request, response, next) => {
+    console.error(error.message)
+
+    if (error.name === 'CastError') {
+        return response.status(400).send({ error: 'malformatted id' })
+    }
+
+    next(error)
+}
 // this is available at localhost:3001 -> http://localhost:3001/api/persons
 // i dont need a db.json file with the same resource
 // it was done like that: npm init -> created this index file -> added the array of data -> wrote app.get(desired path)
 let persons = [
     {
-        "id": 1,
+        "my_id": 1,
         "name": "Arto Hellas",
         "number": "040-123456"
     },
     {
-        "id": 2,
+        "my_id": 2,
         "name": "Ada Lovelace",
         "number": "39-44-5323523"
     },
     {
-        "id": 3,
+        "my_id": 3,
         "name": "Dan Abramov",
         "number": "12-43-234345"
     },
     {
-        "id": 4,
+        "my_id": 4,
         "name": "Mary Poppendieck",
         "number": "39-23-6423122"
     }
@@ -43,14 +56,6 @@ app.get('/', (req, res) => {
     res.send('<h1>a phonebook of sorts</h1>')
 })
 
-
-
-//Content-Type header is automatically set as application/json
-//3.1
-app.get('/api/persons', (req, res) => {
-    res.json(persons)
-})
-
 //3.2
 app.get('/info', (req, res) => {
     total = persons.length
@@ -59,24 +64,31 @@ app.get('/info', (req, res) => {
 })
 
 
+//3.1 -> 3.13 (w mongoose)
+app.get('/api/persons', (req, res) => {
+    Person.find({}).then(persons => {
+        response.json(persons)
+    })
+})
 
-//3.3
-app.get('/api/persons/:id', (req, res) => {
-    const id = Number(req.params.id)
-    const person = persons.find(person => person.id === id)
-    if (person) {
-        res.json(person)
-    } else {
-        res.status(404).end()
-    }
-
+//3.3 -> 3.13 (w mongoose)
+app.get('/api/persons/:id', (req, res, next) => {
+    Person.findById(request.params.id).then(person => {
+        if (person) {
+            res.json(person)
+        } else {
+            res.status(404).end()
+        }
+    })
+        .catch(err => next(err))
 })
 
 const genID = () => Math.floor(Math.random() * 1000000)
 
-//3.5 + 3.6
+//3.5 + 3.6 -> 3.14 (w mongoose)
 app.post('/api/persons', (req, res) => {
     const body = req.body
+    //does this work? maybe to edit
     const copy = persons.find(person => person.name === body.name)
     if (copy) {
         return res.status(400).json({
@@ -88,21 +100,23 @@ app.post('/api/persons', (req, res) => {
             error: "pls add a name"
         })
     }
-    const person = {
-        id: genID(),
+    const person = new Person({
+        my_id: genID(),
         name: body.name,
         number: body.number
-    }
-    persons = persons.concat(person)
-    res.json(person)
+    })
+    person.save().then(savedPerson => {
+        response.json(savedPerson)
+    })
 })
 
-//3.4
-app.delete('/api/persons/:id', (req, res) => {
-    const id = Number(req.params.id)
-    persons = persons.filter(person => person.id !== id)
-    console.log(`person with id ${id} was deleted`)
-    res.status(204).end()
+//3.4 -> 3.15
+app.delete('/api/persons/:id', (req, res, next) => {
+    Person.findByIdAndRemove(request.params.id)
+        .then(result => {
+            res.status(204).end()
+        })
+        .catch(error => next(error))
 })
 
 
@@ -111,14 +125,10 @@ app.use((req, res) => {
     res.send('page not found')
 })
 
+//3.16
+app.use(errorHandler)
 
-const PORT = process.env.PORT || 3001
+const PORT = process.env.PORT
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`)
 })
-// const PORT = 3001
-// app.listen(PORT, () => {
-//     console.log(`Server running on port ${PORT}`)
-//     console.log('sad violin noises')
-// })
-
