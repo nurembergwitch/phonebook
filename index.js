@@ -57,6 +57,7 @@ app.get('/', (req, res) => {
 })
 
 //3.2
+/// =============== UPDATE THIS TOO
 app.get('/info', (req, res) => {
     total = persons.length
     date = new Date()
@@ -88,7 +89,8 @@ const genID = () => Math.floor(Math.random() * 1000000)
 //3.5 + 3.6 -> 3.14 (w mongoose)
 app.post('/api/persons', (req, res) => {
     const body = req.body
-    //does this work? maybe to edit
+    //=================== UPDATE THIS FOR 3.17
+    //If the user tries to create a new phonebook entry for a person whose name is already in the phonebook, the frontend will try to update the phone number of the existing entry by making an HTTP PUT request to the entry's unique URL.
     const copy = persons.find(person => person.name === body.name)
     if (copy) {
         return res.status(400).json({
