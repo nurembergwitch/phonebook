@@ -10,7 +10,7 @@ app.use(cors())
 app.use(express.static('build'))
 app.use(express.json())
 
-const errorHandler = (error, request, res, next) => {
+const errorHandler = (error, req, res, next) => {
     console.error(error.message)
 
     if (error.name === 'CastError') {
@@ -74,7 +74,7 @@ app.get('/api/persons', (req, res) => {
 
 //3.3 -> 3.13 (w mongoose)
 app.get('/api/persons/:id', (req, res, next) => {
-    Person.findById(request.params.id).then(person => {
+    Person.findById(req.params.id).then(person => {
         if (person) {
             res.json(person)
         } else {
