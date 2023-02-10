@@ -115,7 +115,7 @@ app.post('/api/persons', (req, res) => {
 
 //3.4 -> 3.15
 app.delete('/api/persons/:id', (req, res, next) => {
-    Person.findByIdAndRemove(request.params.id)
+    Person.findByIdAndRemove(req.params.id)
         .then(result => {
             res.status(204).end()
         })
