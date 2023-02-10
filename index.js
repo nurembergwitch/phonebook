@@ -91,13 +91,14 @@ app.post('/api/persons', (req, res) => {
     const body = req.body
     //=================== UPDATE THIS FOR 3.17
     //If the user tries to create a new phonebook entry for a person whose name is already in the phonebook, the frontend will try to update the phone number of the existing entry by making an HTTP PUT request to the entry's unique URL.
-    const copy = persons.find(person => person.name === body.name)
-    if (copy) {
-        return res.status(400).json({
-            error: "name must be unique"
-        })
-    }
-    else if (!body.name) {
+    //edited this out
+    // const copy = persons.find(person => person.name === body.name)
+    // if (copy) {
+    //     return res.status(400).json({
+    //         error: "name must be unique"
+    //     })
+    // }
+    if (!body.name) {
         return res.status(400).json({
             error: "pls add a name"
         })
