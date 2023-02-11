@@ -15,6 +15,8 @@ const errorHandler = (error, req, res, next) => {
 
     if (error.name === 'CastError') {
         return res.status(400).send({ error: 'malformatted id' })
+    } else if (error.name === 'ValidationError') {
+        return response.status(400).json({ error: error.message })
     }
 
     next(error)
@@ -98,11 +100,13 @@ app.post('/api/persons', (req, res) => {
     //         error: "name must be unique"
     //     })
     // }
-    if (!body.name) {
-        return res.status(400).json({
-            error: "pls add a name"
-        })
-    }
+
+    //no longer needed after adding constraints in mongoose schema
+    // if (!body.name) {
+    //     return res.status(400).json({
+    //         error: "pls add a name"
+    //     })
+    // }
     const person = new Person({
         my_id: genID(),
         name: body.name,
